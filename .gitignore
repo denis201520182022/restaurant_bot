@@ -1,0 +1,103 @@
+# PostgreSQL и Redis data
+pg_data/
+pgdata/
+data/
+redis_data/
+redis/
+
+# Python bytecode, cache, and logs
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.egg-info/
+*.egg
+*.log
+*.sqlite3
+*.db
+*.bak
+*.tmp
+*.swp
+*.swo
+
+# Virtual environments
+myenv/
+venv/
+.venv/
+ENV/
+.env
+.env.*
+
+# VSCode and IDE
+.vscode/
+.idea/
+*.iml
+
+# Alembic migrations (only versions, keep env.py)
+app/db/migrations/versions/
+
+# Docker
+*.pid
+docker-compose.override.yml
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Pytest and test cache
+.cache/
+.pytest_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Build, dist, and packaging
+build/
+dist/
+*.tar.gz
+*.whl
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+
+# Logs
+logs/
+*.log
+
+# Nginx and systemd example configs (keep templates, ignore secrets)
+deploy/*.service
+deploy/*.conf
+
+# Docker artifacts
+Dockerfile*
+
+# Node (if used for frontend)
+node_modules/
+
+# Local scripts and sensitive files
+seed.py
+entrypoint.sh
+
+# Secret files
+*.secret
+*.key
+*.pem
+
+# Render.com and deployment
+.render/
+
+# Ignore backups
+*~
+
+# Ignore test output
+output/
+
+# Ignore static/media if generated
+static/
+media/
+
+# Ignore migrations for other ORMs
+migrations/
