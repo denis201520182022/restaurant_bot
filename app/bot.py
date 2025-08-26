@@ -23,17 +23,14 @@ WEB_SERVER_PORT = settings.PORT # <-- ИЗМЕНЕНИЕ: Берем порт и
 BASE_WEBHOOK_URL = settings.BASE_WEBHOOK_URL
 WEBHOOK_PATH = f"/bot/{settings.TELEGRAM_BOT_TOKEN}"
 
-# --- Подключение к Redis ---
+# --- Подключение к Redis (ИЗМЕНЕНО) ---
 try:
-    redis_client_for_storage = redis.Redis(
-        host=settings.redis_host, port=settings.redis_port, db=settings.redis_db, socket_connect_timeout=3
-    )
-    storage = RedisStorage(redis_client_for_storage)
+    # Используем from_url, который сам распарсит ссылку из Upstash
+    storage = RedisStorage.from_url(settings.REDIS_URL)
+    # redis_client_for_storage нам больше не нужен в явном виде для shutdown
 except Exception as e:
     logging.error(f"Could not connect to Redis: {e}")
-    from aiogram.fsm.storage.memory import MemoryStorage
-    storage = MemoryStorage()
-    redis_client_for_storage = None
+    # ... (код для MemoryStorage)
 
 # --- Инициализация ---
 bot = Bot(token=settings.TELEGRAM_BOT_TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
@@ -59,11 +56,6 @@ async def on_shutdown_webhook(bot: Bot):
     scheduler.shutdown()
     await bot.delete_webhook()
     logging.info("Webhook has been deleted.")
-    if redis_client_for_storage:
-        await redis_client_for_storage.close()
-        logging.info("Redis connection closed.")
-    await bot.session.close()
-    logging.info("Bot session closed.")
 
 def main():
     dp.startup.register(on_startup_webhook)

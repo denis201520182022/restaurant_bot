@@ -7,11 +7,11 @@ class Settings(BaseSettings):
     BASE_WEBHOOK_URL: str
 
     PORT: int = Field(default=8080)
-    
-    redis_host: str = Field(default="localhost", alias="REDIS_HOST")
-    redis_port: int = Field(default=6379, alias="REDIS_PORT")
-    redis_db: int = Field(default=0, alias="REDIS_DB")
 
+    #redis_host: str = Field(default="localhost", alias="REDIS_HOST")
+    #redis_port: int = Field(default=6379, alias="REDIS_PORT")
+    #redis_db: int = Field(default=0, alias="REDIS_DB")
+    REDIS_URL: str
     db_host: str = Field(..., alias="DB_HOST")
     db_port: int = Field(..., alias="DB_PORT")
     db_name: str = Field(..., alias="DB_NAME")
