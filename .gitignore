@@ -72,7 +72,7 @@ deploy/*.service
 deploy/*.conf
 
 # Docker artifacts
-Dockerfile*
+
 
 # Node (if used for frontend)
 node_modules/
