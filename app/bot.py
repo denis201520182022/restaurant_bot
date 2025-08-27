@@ -5,7 +5,7 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.fsm.storage.redis import RedisStorage
 from aiogram.webhook.aiohttp_server import SimpleRequestHandler, setup_application
 from aiohttp import web
-import redis.asyncio as redis
+import redis.asyncio as redis # <-- Убедись, что этот импорт есть
 import pytz
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
@@ -16,21 +16,19 @@ from app.scheduler import check_reminders
 # --- Конфигурация ---
 logging.basicConfig(level=logging.INFO)
 
-# --- Переменные для вебхука (теперь ВСЕ из конфига) ---
-# --- Переменные для вебхука (теперь ВСЕ из конфига) ---
+# --- Переменные для вебхука ---
 WEB_SERVER_HOST = "0.0.0.0"
-WEB_SERVER_PORT = settings.PORT # <-- ИЗМЕНЕНИЕ: Берем порт из settings
+WEB_SERVER_PORT = settings.PORT
 BASE_WEBHOOK_URL = settings.BASE_WEBHOOK_URL
 WEBHOOK_PATH = f"/bot/{settings.TELEGRAM_BOT_TOKEN}"
 
-# --- Подключение к Redis (ИЗМЕНЕНО) ---
+# --- Подключение к Redis ---
 try:
-    # Используем from_url, который сам распарсит ссылку из Upstash
     storage = RedisStorage.from_url(settings.REDIS_URL)
-    # redis_client_for_storage нам больше не нужен в явном виде для shutdown
 except Exception as e:
     logging.error(f"Could not connect to Redis: {e}")
-    # ... (код для MemoryStorage)
+    from aiogram.fsm.storage.memory import MemoryStorage
+    storage = MemoryStorage()
 
 # --- Инициализация ---
 bot = Bot(token=settings.TELEGRAM_BOT_TOKEN, default=DefaultBotProperties(parse_mode="HTML"))
@@ -56,14 +54,29 @@ async def on_shutdown_webhook(bot: Bot):
     scheduler.shutdown()
     await bot.delete_webhook()
     logging.info("Webhook has been deleted.")
+    # Закрытие сессии Redis и бота теперь управляется через setup_application
+    
+# --- НОВАЯ ФУНКЦИЯ ДЛЯ KEEPALIVE ---
+async def ping_handler(request):
+    """
+    Обработчик для UptimeRobot, который будет его "пинговать".
+    """
+    return web.Response(text="I'm alive!")
 
+# --- Главная функция ---
 def main():
     dp.startup.register(on_startup_webhook)
     dp.shutdown.register(on_shutdown_webhook)
 
     app = web.Application()
+    
+    # Регистрируем обработчик для Telegram
     webhook_requests_handler = SimpleRequestHandler(dispatcher=dp, bot=bot)
     webhook_requests_handler.register(app, path=WEBHOOK_PATH)
+    
+    # ДОБАВЛЯЕМ РЕГИСТРАЦИЮ НАШЕГО ПИНГ-ОБРАБОТЧИКА
+    app.router.add_get("/ping", ping_handler)
+    
     setup_application(app, dp, bot=bot)
     
     logging.info("Starting web server...")
